@@ -1,0 +1,59 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String
+  password  String
+  role      String   @default("User")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  documents Document[]
+  packages  Package[]
+}
+
+model Package {
+  id              String    @id @default(cuid())
+  customerName    String
+  propertyAddress String
+  county          String
+  status          String    @default("Draft")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  userId     Int
+  user       User        @relation(fields: [userId], references: [id])
+  documents  Document[]
+  checklist  ChecklistItem[]
+}
+
+model Document {
+  id         Int      @id @default(autoincrement())
+  name       String
+  url        String
+  version    Int      @default(1)
+  uploadedAt DateTime @default(now())
+  
+  packageId  String
+  package    Package  @relation(fields: [packageId], references: [id])
+  uploaderId Int
+  uploader   User     @relation(fields: [uploaderId], references: [id])
+}
+
+model ChecklistItem {
+  id        Int     @id @default(autoincrement())
+  item      String
+  completed Boolean @default(false)
+  
+  packageId String
+  package   Package @relation(fields: [packageId], references: [id])
+}
