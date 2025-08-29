@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import apiService from './services/api';
 
-// --- MOCK DATA ---
-const MOCK_USERS = {
-  "admin@permitpro.com": { id: 1, name: "Admin User", email: "admin@permitpro.com", password: "password123", role: "Admin" },
-  "user@permitpro.com": { id: 2, name: "Regular User", email: "user@permitpro.com", password: "password123", role: "User" },
-};
-
+// --- MOCK DATA FOR FALLBACK ---
 const FLORIDA_COUNTIES = [
-  "Alachua", "Baker", "Bay", "Bradford", "Brevard", "Broward", "Calhoun", "Charlotte", "Citrus", "Clay", "Collier", "Columbia", "DeSoto", "Dixie", "Duval", "Escambia", "Flagler", "Franklin", "Gadsden", "Gilchrist", "Glades", "Gulf", "Hamilton", "Hardee", "Hendry", "Hernando", "Highlands", "Hillsborough", "Holmes", "Indian River", "Jackson", "Jefferson", "Lafayette", "Lake", "Lee", "Leon", "Levy", "Liberty", "Madison", "Manatee", "Marion", "Martin", "Miami-Dade", "Monroe", "Nassau", "Okaloosa", "Okeechobee", "Orange", "Osceola", "Palm Beach", "Pasco", "Pinellas", "Polk", "Putnam", "Santa Rosa", "Sarasota", "Seminole", "St. Johns", "St. Lucie", "Sumter", "Suwannee", "Taylor", "Union", "Volusia", "Wakulla", "Walton", "Washington"
+  "Alachua", "Baker", "Bay", "Bradford", "Brevard", "Broward", "Calhoun", "Charlotte", 
+  "Citrus", "Clay", "Collier", "Columbia", "DeSoto", "Dixie", "Duval", "Escambia", 
+  "Flagler", "Franklin", "Gadsden", "Gilchrist", "Glades", "Gulf", "Hamilton", "Hardee", 
+  "Hendry", "Hernando", "Highlands", "Hillsborough", "Holmes", "Indian River", "Jackson", 
+  "Jefferson", "Lafayette", "Lake", "Lee", "Leon", "Levy", "Liberty", "Madison", "Manatee", 
+  "Marion", "Martin", "Miami-Dade", "Monroe", "Nassau", "Okaloosa", "Okeechobee", "Orange", 
+  "Osceola", "Palm Beach", "Pasco", "Pinellas", "Polk", "Putnam", "Santa Rosa", "Sarasota", 
+  "Seminole", "St. Johns", "St. Lucie", "Sumter", "Suwannee", "Taylor", "Union", "Volusia", 
+  "Wakulla", "Walton", "Washington"
 ];
 
 // --- ICONS ---
@@ -71,7 +74,12 @@ const Button = ({ children, onClick, className = '', variant = 'default', disabl
     ghost: "bg-transparent hover:bg-gray-100",
   };
   return (
-    <button type={type} onClick={onClick} disabled={disabled} className={`${baseClasses} ${variantClasses[variant]} ${className}`}>
+    <button 
+      type={type}
+      onClick={onClick} 
+      disabled={disabled}
+      className={`${baseClasses} ${variantClasses[variant]} ${className}`}
+    >
       {children}
     </button>
   );

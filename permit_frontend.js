@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import apiService from './services/api'; // Add this import
 
 // --- MOCK DATA ---
-// In a real application, this data would come from a backend API.
-
 const MOCK_USERS = {
   "admin@permitpro.com": { id: 1, name: "Admin User", email: "admin@permitpro.com", password: "password123", role: "Admin" },
   "user@permitpro.com": { id: 2, name: "Regular User", email: "user@permitpro.com", password: "password123", role: "User" },
@@ -67,10 +66,7 @@ const FLORIDA_COUNTIES = [
   "Alachua", "Baker", "Bay", "Bradford", "Brevard", "Broward", "Calhoun", "Charlotte", "Citrus", "Clay", "Collier", "Columbia", "DeSoto", "Dixie", "Duval", "Escambia", "Flagler", "Franklin", "Gadsden", "Gilchrist", "Glades", "Gulf", "Hamilton", "Hardee", "Hendry", "Hernando", "Highlands", "Hillsborough", "Holmes", "Indian River", "Jackson", "Jefferson", "Lafayette", "Lake", "Lee", "Leon", "Levy", "Liberty", "Madison", "Manatee", "Marion", "Martin", "Miami-Dade", "Monroe", "Nassau", "Okaloosa", "Okeechobee", "Orange", "Osceola", "Palm Beach", "Pasco", "Pinellas", "Polk", "Putnam", "Santa Rosa", "Sarasota", "Seminole", "St. Johns", "St. Lucie", "Sumter", "Suwannee", "Taylor", "Union", "Volusia", "Wakulla", "Walton", "Washington"
 ];
 
-
-// --- ICONS (as SVG components) ---
-// Using inline SVGs to avoid external dependencies.
-
+// --- ICONS ---
 const FileIcon = (props) => (
   <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
@@ -87,30 +83,29 @@ const PlusCircleIcon = (props) => (
 );
 
 const LogOutIcon = (props) => (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-        <polyline points="16 17 21 12 16 7" />
-        <line x1="21" y1="12" x2="9" y2="12" />
-    </svg>
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    <polyline points="16 17 21 12 16 7" />
+    <line x1="21" y1="12" x2="9" y2="12" />
+  </svg>
 );
 
 const UploadCloudIcon = (props) => (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
-        <path d="M12 12v9" />
-        <path d="m16 16-4-4-4 4" />
-    </svg>
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+    <path d="M12 12v9" />
+    <path d="m16 16-4-4-4 4" />
+  </svg>
 );
 
 const XIcon = (props) => (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M18 6 6 18" />
-        <path d="m6 6 12 12" />
-    </svg>
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 6 6 18" />
+    <path d="m6 6 12 12" />
+  </svg>
 );
 
-// --- UI COMPONENTS (shadcn/ui style) ---
-
+// --- UI COMPONENTS ---
 const Card = ({ children, className = '' }) => (
   <div className={`bg-white border border-gray-200 rounded-lg shadow-sm ${className}`}>
     {children}
@@ -122,8 +117,8 @@ const CardContent = ({ children, className = '' }) => <div className={`p-6 ${cla
 const CardTitle = ({ children, className = '' }) => <h3 className={`text-lg font-semibold leading-none tracking-tight ${className}`}>{children}</h3>;
 const CardDescription = ({ children, className = '' }) => <p className={`text-sm text-gray-500 ${className}`}>{children}</p>;
 
-const Button = ({ children, onClick, className = '', variant = 'default' }) => {
-  const baseClasses = "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
+const Button = ({ children, onClick, className = '', variant = 'default', disabled = false, type = 'button' }) => {
+  const baseClasses = "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none px-4 py-2";
   const variantClasses = {
     default: "bg-gray-900 text-white hover:bg-gray-800",
     destructive: "bg-red-600 text-white hover:bg-red-700",
@@ -131,7 +126,12 @@ const Button = ({ children, onClick, className = '', variant = 'default' }) => {
     ghost: "bg-transparent hover:bg-gray-100",
   };
   return (
-    <button onClick={onClick} className={`${baseClasses} ${variantClasses[variant]} ${className}`}>
+    <button 
+      type={type}
+      onClick={onClick} 
+      disabled={disabled}
+      className={`${baseClasses} ${variantClasses[variant]} ${className}`}
+    >
       {children}
     </button>
   );
@@ -145,12 +145,12 @@ const Input = ({ className = '', ...props }) => (
 );
 
 const Select = ({ children, className = '', ...props }) => (
-    <select
-        className={`flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
-        {...props}
-    >
-        {children}
-    </select>
+  <select
+    className={`flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+    {...props}
+  >
+    {children}
+  </select>
 );
 
 const Label = ({ children, htmlFor, className = '' }) => (
@@ -179,56 +179,68 @@ const Badge = ({ children, status }) => {
   );
 };
 
-// Main App Component
-const App = () => {
-  const [user, setUser] = useState(null);
-  const [packages, setPackages] = useState(MOCK_PACKAGES);
+const Modal = ({ children, isOpen, onClose }) => {
+  if (!isOpen) return null;
   
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">PermitPro</h1>
-        <div className="grid gap-4">
-          {packages.map(pkg => (
-            <Card key={pkg.id}>
-              <CardContent>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="font-semibold">{pkg.customerName}</h3>
-                    <p className="text-sm text-gray-600">{pkg.propertyAddress}</p>
-                  </div>
-                  <Badge status={pkg.status}>{pkg.status}</Badge>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={onClose}>
+      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-lg mx-4" onClick={e => e.stopPropagation()}>
+        <div className="p-6">
+          {children}
         </div>
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+          <XIcon className="h-6 w-6" />
+        </button>
       </div>
     </div>
   );
 };
 
-export default App; || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
-      {children}
-    </span>
-  );
-};
+// --- ERROR BOUNDARY ---
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null, errorInfo: null };
+  }
 
-const Modal = ({ children, isOpen, onClose }) => {
-    if (!isOpen) return null;
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={onClose}>
-            <div className="relative bg-white rounded-lg shadow-xl w-full max-w-lg" onClick={e => e.stopPropagation()}>
-                <div className="p-6">
-                    {children}
-                </div>
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-                    <XIcon className="h-6 w-6" />
-                </button>
-            </div>
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    this.setState({
+      error: error,
+      errorInfo: errorInfo
+    });
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <Card className="max-w-md">
+            <CardHeader>
+              <CardTitle>Error Occurred</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-red-500">Something went wrong.</p>
+              <details className="mt-4 text-sm">
+                <summary className="cursor-pointer">Show details</summary>
+                <pre className="text-xs mt-2 overflow-auto">
+                  {this.state.error && this.state.error.toString()}
+                  <br />
+                  {this.state.errorInfo.componentStack}
+                </pre>
+              </details>
+            </CardContent>
+          </Card>
         </div>
-    );
-};
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 // --- APPLICATION COMPONENTS ---
 
